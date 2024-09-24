@@ -1,22 +1,37 @@
 const express = require("express");
 const app = express();
 
-app.get("/user",(req,res)=>{
-    res.send({
-        "firstName":"Vidya"
-    })
-})
-app.post("/user",(req,res)=>{
-    res.send("save data to databse")
-})
+// app.get("/ab?cd",(req,res)=>{
+//     res.send("This is ab?c route")
+    
+// });
+app.get("/ab*cd",(req,res)=>{
+    res.send("This is ab*cd route")
+    
+});
+app.get(/a/,(req,res)=>{
+    res.send("This is /a/ route")
+    
+});
+app.get(/.*fly$/,(req,res)=>{
+    res.send("This is fly route")
+    
+});
+//Reading query from route
+app.get("/test",(req,res)=>{
+    console.log(req.query);
+    
+    res.send("This is fly route")
+    
+});
+//Reading params from route
+app.get("/test/:userId",(req,res)=>{
+    console.log(req.params);
+    
+    res.send("This is fly route")
+    
+});
 
-app.delete("/user",(req,res)=>{
-    res.send("user data deleted from databse")
-})
-
-app.use("/",(req,res)=>{
-    res.send("404 resource not found 🚫 ")
-})
 app.listen("3000",()=>{
     console.log("Server is listening to 3000");
     
