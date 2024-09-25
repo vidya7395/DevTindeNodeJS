@@ -1,40 +1,27 @@
 const express = require("express");
 const app = express();
 
-// app.get("/ab?cd",(req,res)=>{
-//     res.send("This is ab?c route")
-    
-// });
-app.get("/ab*cd",(req,res)=>{
-    res.send("This is ab*cd route")
-    
-});
-app.get(/a/,(req,res)=>{
-    res.send("This is /a/ route")
-    
-});
-app.get(/.*fly$/,(req,res)=>{
-    res.send("This is fly route")
-    
-});
-//Reading query from route
-app.get("/test",(req,res)=>{
-    console.log(req.query);
-    
-    res.send("This is fly route")
-    
-});
-//Reading params from route
-app.get("/test/:userId",(req,res)=>{
-    console.log(req.params);
-    
-    res.send("This is fly route")
-    
-});
 
-app.listen("3000",()=>{
+//Making middleware to check authenticated user
+app.use("/admin", (req, res, next) => {
+    const requestToken = "xyzeee";
+    let isAuthenticated = false;
+    if (requestToken === "xyz") isAuthenticated = true;
+    if (isAuthenticated) {
+        next();
+    }
+    else{
+        res.status(401).send("User is not authorised")
+    }
+
+}
+)
+app.get("/admin/isLogin",(req,res)=>{
+    res.send("Hey Admin ")
+})
+app.listen("3000", () => {
     console.log("Server is listening to 3000");
-    
+
 })
 
 
