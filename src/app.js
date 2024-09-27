@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const {adminAuth,userAuth} = require("./middlewares/auth")
-
+const {connectDB}= require("./config/database")
  
 //Making middleware to check authenticated user
 
@@ -17,14 +17,22 @@ app.get("/user/data",userAuth,(req,res)=>{
     res.send("This is user data")
 })
 
-app.listen("3000", () => {
-    console.log("Server is listening to 3000");
 
-});
 app.use("/",(err,req,res,next)=>{
     if(err){                
         res.status(500).send("Something went wrong !")
     }
 });
-
-
+connectDB()
+.then(()=>{
+    console.log("Database connection establish");
+    app.listen("3000", () => {
+        console.log("Server is listening to 3000");
+    
+    });
+    
+})
+.catch((error)=>{
+    console.log("Database cannot be connected");
+    
+})
