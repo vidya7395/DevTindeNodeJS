@@ -7,6 +7,7 @@ const Users = require("./model/user")
 app.use(express.json());
 app.post("/signup", async (req, res) => {
     const user = new Users(req.body);
+    
     try {
         await user.save();
         res.send("success")
@@ -29,7 +30,7 @@ app.get("/userEmail", async (req, res) => {
             res.status(404).send("User not found")
         }
         else
-        res.status(200).send(user)
+            res.status(200).send(user)
     } catch (error) {
         res.status(400).send("Something went wrong" + error.message)
     }
@@ -50,30 +51,40 @@ app.get("/feed", async (req, res) => {
 
 //delete User
 app.delete("/user", async (req, res) => {
-   const  userId = req.body.userId;
-   try {
+    const userId = req.body.userId;
+    try {
         const user = await Users.findByIdAndDelete(userId);
         res.send("User deleted successfully")
-         
-   } catch (error) {
+
+    } catch (error) {
         console.log("error", error);
-        
-   }
+
+    }
 
 });
-app.patch("/user", async(req,res)=>{
-    const  userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+    const userId = req.params.userId;
     const data = req.body
-   try {
-        const user = await Users.findByIdAndUpdate(userId,data,{
-            runValidators: true
-        });
-        res.send("User updated successfully");
-         
-   } catch (error) {
-        console.log("error", error);
+    try {
+        const ALLOWED_UPDATES = ["age","gender","about","skills"];
+        const isUpdteAllowed = Object.keys(data).every((key)=>ALLOWED_UPDATES.includes(key));
+        console.log("isAllowed user", isUpdteAllowed);
         
-   }
+        if(!isUpdteAllowed){
+            throw new Error("Update is not allowed !")
+        }
+        
+        const user = await Users.findByIdAndUpdate(userId, data, {
+            runValidators: true,
+            returnDocument:"after"
+        });
+        res.send("User updated successfully" + user);
+
+    } catch (error) {
+        console.log("error", error.message);
+        res.status(400).send("There was a error updating user "+ error.message)
+
+    }
 })
 connectDB()
     .then(() => {
