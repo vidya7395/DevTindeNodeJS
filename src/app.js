@@ -6,7 +6,11 @@ const Users = require("./model/user")
 const { validatingSignUpData } = require("./utils/validators")
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require('cookie-parser')
+const jwt = require("jsonwebtoken");
 app.use(express.json());
+app.use(cookieParser());
+
 app.post("/signup", async (req, res) => {
 
     try {
@@ -33,6 +37,7 @@ app.post("/signup", async (req, res) => {
 //get user from email
 
 app.get("/userEmail", async (req, res) => {
+
     const userEmail = req.body.email;
 
     try {
@@ -77,17 +82,36 @@ app.delete("/user", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+
     try {
         const { emailId, password } = req.body;
         if (!validator.isEmail(emailId)) throw new Error("Email is not valid");
         const user = await Users.findOne({ emailId });
         if (!user) throw new Error("Invalid credentials!");
         const isPassowordValid = await bcrypt.compare(password, user.password);
-        if(!isPassowordValid) throw new Error("Invalid Credentials !");
-        else  res.send("Login Successfull !")
-        
+        if (!isPassowordValid) throw new Error("Invalid Credentials !");
+
+
+        else {
+            //Create JWT token
+            const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790", { expiresIn: "1d" });
+            //Add the token to cookie and send the response back
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 8 * 3600000),
+            });
+            res.send("Login Successfull !")
+        }
+
     } catch (error) {
         res.status(400).send("ERROR: " + error.message)
+    }
+});
+app.get("/profile", userAuth, async (req, res) => {
+    try {
+        const user = req.user;
+        res.send(user)
+    } catch (error) {
+        res.status(400).send("Error " + error.message)
     }
 })
 app.patch("/user/:userId", async (req, res) => {
@@ -96,8 +120,6 @@ app.patch("/user/:userId", async (req, res) => {
     try {
         const ALLOWED_UPDATES = ["age", "gender", "about", "skills"];
         const isUpdteAllowed = Object.keys(data).every((key) => ALLOWED_UPDATES.includes(key));
-        console.log("isAllowed user", isUpdteAllowed);
-
         if (!isUpdteAllowed) {
             throw new Error("Update is not allowed !")
         }
@@ -114,6 +136,8 @@ app.patch("/user/:userId", async (req, res) => {
 
     }
 })
+
+app.post("/sendConnectionRequest", userAuth,)
 connectDB()
     .then(() => {
         console.log("Database connection establish");
