@@ -1,24 +1,26 @@
 const mongoose = require("mongoose");
-const validtor = require('validator');
+const validator = require('validator');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema({
     firstName:{
         type: String,
         required: "Please enter the firstName",
-        maxLenght:50,
-        minLenght: 4
+        maxLength:50,
+        minLength: 4
     },
     lastName:{
         type: String
     },
     emailId:{
-        type: String,
+        type: String, // hey what is it
         lowercase: true,
         trim: true,
         required: true,
         unique: true,
         validate(value){
-            if(!validtor.isEmail(value)){
+            if(!validator.isEmail(value)){
                 throw new Error("Invalid email address")
             }
         }
@@ -27,7 +29,7 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         validate(value){
-            if(!validtor.isStrongPassword(value)){
+            if(!validator.isStrongPassword(value)){
                 throw new Error("Enter a strong password")
             }
         }
@@ -48,13 +50,13 @@ const userSchema = mongoose.Schema({
     },
     about:{
         type:String,
-        defualt: " this is the about of the user!"  
+        default: " this is the about of the user!"  
     },
     photoUrl :{
         type: String,
         default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfGUTrUMDG6phH5gx8RpKS0FGpmr1dpHsaZg&s",
         validate(value){
-            if(!validtor.isURL(value)){
+            if(!validator.isURL(value)){
                 throw new Error("Invalid photo URL")
             }
         }
@@ -69,6 +71,17 @@ const userSchema = mongoose.Schema({
     }
 
 }, {timestamps: true});
+
+userSchema.methods.getJWT = async function(){
+    const user = this;
+    const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790", { expiresIn: "1d" });
+    return token;
+}
+userSchema.methods.validatePassword = async function(passwordInputByUser){
+    const user = this;
+    const isValidated =  await bcrypt.compare(passwordInputByUser, user.password);
+    return isValidated;
+}
 
 const Users = mongoose.model("Users", userSchema);
 module.exports = Users;
