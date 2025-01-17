@@ -8,7 +8,7 @@ const adminAuth = (req, res, next) => {
         next();
     }
     else {
-        res.status(401).send("User is not authorised")
+        res.status(401).send("User is not authorized")
     }
 
 }
