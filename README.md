@@ -1,2 +1,6 @@
-# DevTindeNodeJS
-This is a dev tinder app made in nodeJS
+# NodeJS
+
+
+## //Review and response on the request
+   
+   POST - /request/review/:status/:requestId

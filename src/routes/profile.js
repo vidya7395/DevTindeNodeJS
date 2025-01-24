@@ -20,7 +20,7 @@ profileRouter.patch("/user/:userId", userAuth, async (req, res) => {
     const userId = req.params.userId;
     const data = req.body
     try {
-        const ALLOWED_UPDATES = ["firstName","lastName", "age", "gender", "about", "skills"];
+        const ALLOWED_UPDATES = ["firstName", "lastName", "age", "gender", "about", "skills"];
         const isUpdateAllowed = Object.keys(data).every((key) => ALLOWED_UPDATES.includes(key));
         if (!isUpdateAllowed) {
             throw new Error("Update is not allowed !")
@@ -41,31 +41,31 @@ profileRouter.patch("/user/:userId", userAuth, async (req, res) => {
 profileRouter.patch("/resetPassword/:userId", userAuth, async (req, res) => {
     const userId = req.params.userId;
     const data = req.body;
-    console.log("data",data);
-    
+    console.log("data", data);
+
     try {
-        const ALLOWED_UPDATES = ["password","newPassword"];
+        const ALLOWED_UPDATES = ["password", "newPassword"];
         const isUpdateAllowed = Object.keys(data).every((key) => ALLOWED_UPDATES.includes(key));
         if (!isUpdateAllowed) {
             throw new Error("Update is not allowed !")
         }
         console.log("userID", userId);
-        
-        const user = await Users.findById(userId );
-        console.log("usr",user);
-        if(!user) throw new Error("user not found");
-        const isPasswordValid = await user  .validatePassword(data.password);
-        if(!isPasswordValid) throw new Error("Invalid Credentials")
-                        else{
-                    const passwordHash = await bcrypt.hash(data.newPassword, 10);
-                    const user = await Users.findByIdAndUpdate(userId, {password :passwordHash}, {
-                        runValidators: true,
-                        returnDocument: "after"
-                    });
-                    await user.save();
-        res.send("success")
-                        }
-      
+
+        const user = await Users.findById(userId);
+        console.log("usr", user);
+        if (!user) throw new Error("user not found");
+        const isPasswordValid = await user.validatePassword(data.password);
+        if (!isPasswordValid) throw new Error("Invalid Credentials")
+        else {
+            const passwordHash = await bcrypt.hash(data.newPassword, 10);
+            const user = await Users.findByIdAndUpdate(userId, { password: passwordHash }, {
+                runValidators: true,
+                returnDocument: "after"
+            });
+            await user.save();
+            res.send("success")
+        }
+
 
     } catch (error) {
         console.log("error", error.message);
@@ -79,7 +79,7 @@ profileRouter.delete("/user", async (req, res) => {
     const userId = req.body.userId;
     try {
         const user = await Users.findByIdAndDelete(userId);
-        res.send("User deleted successfully"+user)
+        res.send("User deleted successfully" + user)
 
     } catch (error) {
         console.log("error", error);
@@ -98,4 +98,6 @@ profileRouter.get("/feed", async (req, res) => {
 
 
 });
+
+
 module.exports = profileRouter;
