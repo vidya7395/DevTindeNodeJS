@@ -65,32 +65,29 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 userRouter.get("/user/feed", userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
+        let page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+        limit = limit >50 ? 50 : limit;
+        limit = limit < 1 ? 1 : limit;
+        page = page < 1 ? 1 : page;
+        const skip = (page - 1) * limit;
         console.log(loggedInUser);
-
-        //Remove the logged in user from the list
-        // let allUserExceptLoggedIn = allUser.filter((user) => user._id.toString() !== loggedInUser._id.toString());
-        // Remove the user who are already connected with the logged in user
         const connectionRequests = await ConnectionRequestModel.find({
             $or: [
                 { fromUserId: loggedInUser._id },
                 { toUserId: loggedInUser._id }
             ],
         }).select("fromUserId toUserId");
-        //Remove connection Request user from allUserExceptLoggedIn
-        // connectionRequests.forEach((request) => {
-        //     allUserExceptLoggedIn = allUserExceptLoggedIn.filter((user) => user._id.toString() !== request.fromUserId._id.toString() && user._id.toString() !== request.toUserId._id.toString());
-        // });
-        //Set data structure is like an array but it will not allow duplicate values , it will only contain unique values
         const hideUsersFromFeed = new Set();
         connectionRequests.forEach((request) => {
             hideUsersFromFeed.add(request.fromUserId.toString());
             hideUsersFromFeed.add(request.toUserId.toString());
         })
-//$nin : not in this array , $ne means not equal to
+        //$nin : not in this array , $ne means not equal to
         const allUser = await Users.find({
             $and: [{ _id: { $nin: Array.from(hideUsersFromFeed) } },
             { _id: { $ne: loggedInUser._id } }],
-        }).select(USER_SAFE_DATA);;
+        }).select(USER_SAFE_DATA).skip(skip).limit(limit);
         res.json({
             message: "Data fetched successfully",
             data: allUser
@@ -100,5 +97,53 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         res.status(400).send({ message: error.message })
     }
 });
+
+//!old code
+
+// userRouter.get("/user/feed", userAuth, async (req, res) => {
+//     try {
+//         const loggedInUser = req.user;
+//         let page = parseInt(req.query.page) || 1;
+//         let limit = parseInt(req.query.limit) || 10;
+//         limit = limit >50 ? 50 : limit;
+//         limit = limit < 1 ? 1 : limit;
+//         page = page < 1 ? 1 : page;
+//         const skip = (page - 1) * limit;
+//         console.log(loggedInUser);
+
+//         //Remove the logged in user from the list
+//         // let allUserExceptLoggedIn = allUser.filter((user) => user._id.toString() !== loggedInUser._id.toString());
+//         // Remove the user who are already connected with the logged in user
+//         const connectionRequests = await ConnectionRequestModel.find({
+//             $or: [
+//                 { fromUserId: loggedInUser._id },
+//                 { toUserId: loggedInUser._id }
+//             ],
+//         }).select("fromUserId toUserId");
+//         //Remove connection Request user from allUserExceptLoggedIn
+//         //old code
+//         // connectionRequests.forEach((request) => {
+//         //     allUserExceptLoggedIn = allUserExceptLoggedIn.filter((user) => user._id.toString() !== request.fromUserId._id.toString() && user._id.toString() !== request.toUserId._id.toString());
+//         // });
+//         //Set data structure is like an array but it will not allow duplicate values , it will only contain unique values
+//         const hideUsersFromFeed = new Set();
+//         connectionRequests.forEach((request) => {
+//             hideUsersFromFeed.add(request.fromUserId.toString());
+//             hideUsersFromFeed.add(request.toUserId.toString());
+//         })
+//         //$nin : not in this array , $ne means not equal to
+//         const allUser = await Users.find({
+//             $and: [{ _id: { $nin: Array.from(hideUsersFromFeed) } },
+//             { _id: { $ne: loggedInUser._id } }],
+//         }).select(USER_SAFE_DATA).skip(skip).limit(limit);
+//         res.json({
+//             message: "Data fetched successfully",
+//             data: allUser
+//         });
+
+//     } catch (error) {
+//         res.status(400).send({ message: error.message })
+//     }
+// });
 
 module.exports = userRouter;
