@@ -15,9 +15,9 @@ const adminAuth = (req, res, next) => {
 
 const userAuth = async (req, res, next) => {
    try {
-     const { token } = req.cookies;
+     const  token  = await req.cookies?.token;     
      if (!token) {
-         return res.status(401).send("Please login again!");
+         return res.status(401).send("Token ISSUE Please login again!");
      }
      const decodedObj = await jwt.verify(token, "DEV@Tinder$790");
      const { _id } = decodedObj;

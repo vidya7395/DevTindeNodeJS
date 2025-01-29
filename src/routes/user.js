@@ -63,6 +63,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 
 //Get data of all user : Feed API
 userRouter.get("/user/feed", userAuth, async (req, res) => {
+    console.log("Inside");
+    
     try {
         const loggedInUser = req.user;
         let page = parseInt(req.query.page) || 1;
@@ -71,7 +73,6 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         limit = limit < 1 ? 1 : limit;
         page = page < 1 ? 1 : page;
         const skip = (page - 1) * limit;
-        console.log(loggedInUser);
         const connectionRequests = await ConnectionRequestModel.find({
             $or: [
                 { fromUserId: loggedInUser._id },
@@ -85,9 +86,12 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         })
         //$nin : not in this array , $ne means not equal to
         const allUser = await Users.find({
-            $and: [{ _id: { $nin: Array.from(hideUsersFromFeed) } },
-            { _id: { $ne: loggedInUser._id } }],
+            $and: [
+            { _id: { $nin: Array.from(hideUsersFromFeed) } },
+            { _id: { $ne: loggedInUser._id.toString() } }],
         }).select(USER_SAFE_DATA).skip(skip).limit(limit);
+        console.log("Logged in user", allUser );
+        
         res.json({
             message: "Data fetched successfully",
             data: allUser
