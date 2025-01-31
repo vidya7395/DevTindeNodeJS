@@ -50,14 +50,9 @@ authRouter.post("/login", async (req, res) => {
 
         else {
             const token = await user.getJWT();
-            res.cookie("token", token,
-                 {
-                      expires: new Date(Date.now() + 8 * 3600000),
-                      secure: true,  // Ensure you're using HTTPS on EC2
-                      sameSite: 'None', // Allow cookies to be sent cross-origin
-                      httpOnly: true,   
-                 }
-        );
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 8 * 3600000),
+            });
             res.send(user)
         }
 
