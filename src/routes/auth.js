@@ -53,7 +53,8 @@ authRouter.post("/login", async (req, res) => {
             res.cookie("token", token,
                  {
                       expires: new Date(Date.now() + 8 * 3600000),
-                      sameSite:'Lax'
+                      secure: true,  // Ensure you're using HTTPS on EC2
+                      sameSite: 'None', // Allow cookies to be sent cross-origin
                  }
         );
             res.send(user)
