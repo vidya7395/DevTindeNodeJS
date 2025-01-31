@@ -49,7 +49,7 @@ requestRouter.post(`/request/send/:status/:toUserId`, userAuth, async (req, res)
 
     const data = await connectionRequest.save();
     if(status === "interested");
-    const emailRes = await sendEmail.run();
+    const emailRes = await sendEmail.run(`Got a friend request from ${req.user.firstName}`, "Got a new friend request");
     console.log("Email", emailRes);
     
     res.json({
