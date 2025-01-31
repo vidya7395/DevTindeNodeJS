@@ -62,9 +62,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 });
 
 //Get data of all user : Feed API
-userRouter.get("/user/feed", userAuth, async (req, res) => {
-    console.log("Inside");
-    
+userRouter.get("/user/feed", userAuth, async (req, res) => {    
     try {
         const loggedInUser = req.user;
         let page = parseInt(req.query.page) || 1;
@@ -89,9 +87,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
             $and: [
             { _id: { $nin: Array.from(hideUsersFromFeed) } },
             { _id: { $ne: loggedInUser._id.toString() } }],
-        }).select(USER_SAFE_DATA).skip(skip).limit(limit);
-        console.log("Logged in user", allUser );
-        
+        }).select(USER_SAFE_DATA).skip(skip).limit(limit);        
         res.json({
             message: "Data fetched successfully",
             data: allUser

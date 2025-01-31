@@ -2,6 +2,7 @@ const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../model/connectionRequest");
 const Users = require("../model/user");
+const sendEmail  = require("../utils/sendEmail");
 const requestRouter = express.Router();
 requestRouter.post(`/request/send/:status/:toUserId`, userAuth, async (req, res) => {
   try {
@@ -47,6 +48,10 @@ requestRouter.post(`/request/send/:status/:toUserId`, userAuth, async (req, res)
 
 
     const data = await connectionRequest.save();
+    if(status === "interested");
+    const emailRes = await sendEmail.run();
+    console.log("Email", emailRes);
+    
     res.json({
       message: status === "interested" ? `${req.user.firstName} is interested  in ${ifToUserIdExists.firstName}` : `${req.user.firstName} has ignored the ${ifToUserIdExists.firstName}`,
       data
