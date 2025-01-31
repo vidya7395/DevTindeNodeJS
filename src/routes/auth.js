@@ -55,6 +55,7 @@ authRouter.post("/login", async (req, res) => {
                       expires: new Date(Date.now() + 8 * 3600000),
                       secure: true,  // Ensure you're using HTTPS on EC2
                       sameSite: 'None', // Allow cookies to be sent cross-origin
+                      httpOnly: true,   
                  }
         );
             res.send(user)
