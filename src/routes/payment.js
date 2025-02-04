@@ -56,7 +56,8 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     if(!isWebhookValid){
       return res.status(400).json({message:"Webhook signature is invalid"})
     }
-    console.log("reqBody", req.body);
+    console.log("isWebhookValid ", isWebhookValid);
+    
           //Update my payment status in DB
         //Update the user as premium
         //If we don't use razorpay the webhook will keep calling
@@ -75,6 +76,8 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
       if(req.body.event == "payment.failed"){
 
       }
+      console.log("orderid", paymentDetails.order_id);
+      
       return res.status(200).json({message:"Webhook seceded successfully"})
     // #webhook_body should be raw webhook request body
   } catch (error) {
