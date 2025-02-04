@@ -71,7 +71,14 @@ const userSchema = mongoose.Schema({
                 throw new Error("Only 5 skills can be added")
             }
         }
-    }
+    },
+    isPremium:{
+        type:Boolean,
+        default: false
+    },
+    membershipType:{
+        type:String,
+    },
 
 }, {timestamps: true});
 
