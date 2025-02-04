@@ -46,12 +46,12 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 //This is called by razorpay so don't use userAuth
 paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
-    const webhookSignature = req.get["X-Razorpay-Signature"]
+    const webhookSignature = req.get("X-Razorpay-Signature")
     //razor pay sends req.body and also X-Razorpay-Signature in header -=> which is webHookSignature
-    const isWebhookValid = validateWebhookSignature(
+    const isWebhookValid =  validateWebhookSignature(
       JSON.stringify(req.body), 
       webhookSignature, 
-      RAZORPAY_WEBHOOK_SECRET
+      process.env.RAZORPAY_WEBHOOK_SECRET
     );
     if(!isWebhookValid){
       return res.status(400).json({message:"Webhook signature is invalid"})
