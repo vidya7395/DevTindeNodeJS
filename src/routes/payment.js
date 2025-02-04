@@ -63,8 +63,6 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
         //If we don't use razorpay the webhook will keep calling
         //return success response to razorpay
         const paymentDetails = req.body.payload.payment.entity;
-        
-      if(req.body.event == "payment.captured"){
         const payment = await Payment.findOne({orderId: paymentDetails.order_id});
         payment.status = paymentDetails.status;
         await payment.save();
@@ -72,6 +70,8 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
         user.isPremium = true;
         user.membershipType = payment.notes.membershipType;
         await user.save();
+      if(req.body.event == "payment.captured"){
+        
       }
       if(req.body.event == "payment.failed"){
 
@@ -86,4 +86,11 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     return res.status(500).json({ message: error.message })
   }
 });
+paymentRouter.post("/premium/verify", async (req, res) => {
+  const user = req.user;
+  // if(user.isPremium){
+    // return res.json({isPremium:true})
+  // }
+  return res.son({isPremium:isPremium})
+})
 module.exports = paymentRouter;
