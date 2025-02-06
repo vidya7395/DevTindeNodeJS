@@ -40,7 +40,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   } catch (error) {
     console.log("Error", error);
 
-    return res.status(500).json({ message: error.message })
+     res.status(500).json({ message: error.message })
   }
 });
 //This is called by razorpay so don't use userAuth
