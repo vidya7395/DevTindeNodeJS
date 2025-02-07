@@ -5,7 +5,9 @@ const cookie = require("cookie");
 const { Chat } = require("../model/chat");
 const { timeStamp } = require("console");
 const ConnectionRequestModel = require("../model/connectionRequest");
+const Users = require("../model/user");
 
+const onlineUsers = new Map();
 const getSecretRoomId = (userId, targetUserId) => {
     return crypto
         .createHash("sha256")
@@ -54,12 +56,20 @@ const initializeSocket = (server) => {
 
 
     io.on("connection", (socket) => {
-        console.log(`🟢 User connected: ${socket.user._id}`);
-
-        socket.on("joinChat", ({ userId, targetUserId, firstName }) => {
+        const userId = socket.user._id;
+        console.log(`🟢 User connected: ${userId}`);
+        onlineUsers.set(userId,socket.id);
+        io.emit("updateUserStatus",Array.from(onlineUsers.keys()));
+        socket.on("joinChat", async({ userId, targetUserId, firstName }) => {
             const roomId = getSecretRoomId(userId, targetUserId);
             socket.join(roomId);
             console.log(`👤 ${firstName} joined room: ${roomId}`);
+            const targetUser = await Users.findOne({
+                _id:targetUserId
+            });
+            const targetUserName = targetUser.firstName;
+            console.log("Target User Id", targetUser);
+            io.to(roomId).emit("online",{firstName,targetUserName})
         });
 
         socket.on("sendMessage", async ({ userId, targetUserId, firstName, text }) => {
@@ -74,6 +84,8 @@ const initializeSocket = (server) => {
                         { fromUserId: targetUserId ,toUserId:userId,status:"accepted"}
                     ]
                 }).select("fromUserId toUserId");
+               
+                
                 console.log("isUserFriends",isUserFriends);
                 if(isUserFriends){
                 //find chat from database
@@ -117,7 +129,11 @@ const initializeSocket = (server) => {
             console.log("stop typing",firstName);
         });
     
-        socket.on("disconnect", () => {
+        socket.on("disconnect", ({userId, targetUserId}) => {
+            const roomId = getSecretRoomId(userId, targetUserId);
+            io.to(roomId).emit("offline")
+            io.emit("updateUserStatus", Array.from(onlineUsers.keys()));
+
             console.log(`🔴 User disconnected: ${socket.user?.userId || "unknown"}`);
         });
     });
